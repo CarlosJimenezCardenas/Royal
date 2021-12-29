@@ -19,6 +19,7 @@ set_include_path(implode(PATH_SEPARATOR, array(
 $strServer = 'ftp.hycite.com';
 $intPort = 22;
 $strUsername = 'payrollplus-mx';
+//$strPassword = 'Ayp$QuetOornOcdeb8';
 $strPassword = 'Ayp$QuetOornOcdeb8';
 
 /**
@@ -34,6 +35,8 @@ $objFtp = new Net_SFTP( $strServer , $intPort );
 // Realizamos el logeo
 if (!$objFtp ->login( $strUsername , $strPassword )) {
 	 exit( 'Login Failed' );
+}else{
+	echo "Login success!!!/n";
 }
 //$objFtp->chdir('Fortia/Prod/Pendientes'); // open directory 'test'
 $objFtp->chdir('Fortia/Prod/Moves_Newhires'); // open directory 'test'
@@ -81,9 +84,15 @@ fputcsv($f, $fields, $delimiter);
 
 //SE COMPARA CONTRA LA BASE DE DATOS
 $serverName = "10.11.0.34";
-$connectionInfo = array( "Database"=>"Royal", "UID"=>"carlosj", "PWD"=>"martha01");
+$connectionInfo = array( "Database"=>"PPTEST", "UID"=>"carlosj", "PWD"=>"martha01");
 $conn = sqlsrv_connect( $serverName, $connectionInfo);
 //$arrayGeneral = array();
+/*if($conn){
+	echo "OK";
+}else{
+	echo "MAL";
+}
+die();*/
 $localFilePath  = "/var/www/html/Descargas/";
 $x = 0;
 foreach($objFtp->nlist() as $a){
@@ -550,20 +559,34 @@ foreach($objFtp->nlist() as $a){
 		$contador++;
 	}
 }
-/*echo "<pre>";
+echo "<pre>";
 print_r($arrayGeneral);
-echo "</pre>";
-die();*/
-$serverName = "10.11.0.34"; //serverName\instanceName
-$connectionInfo = array( "Database"=>"PPTEST", "UID"=>"carlosj", "PWD"=>"martha01");
-$conn = sqlsrv_connect( $serverName, $connectionInfo);
+echo "</pre></br></br>";
+//die();*/
 
 $intArray[0]['entero_default'] = 0;
 $intArray[0]['float_default'] = 0.00;
 $intArray[0]['varchar'] = '';
 
+$contador=0;
+$serverName2 = "10.11.0.34"; //serverName\instanceName
+//$connectionInfo2 = array( "Database"=>"Royal", "UID"=>"", "PWD"=>"");
+$connectionInfo2 = array( "Database"=>"PPTEST", "UID"=>"carlosj", "PWD"=>"martha01");
+$conn2 = sqlsrv_connect( $serverName2, $connectionInfo2);
+
+/*$sql2 = "{call sp_KER_AltaTrabajadores_WinServ
+	(
+		?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+		?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+		?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+		?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+		?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+		?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+		?, ?, ?, ?, ?
+	)}";*/
+
 foreach($arrayGeneral as $a){
-	$sql = "exec sp_KER_AltaTrabajadores_WinServ 
+	$sql2 = "exec sp_KER_AltaTrabajadores_WinServ 
 	@ClaTrab = ".$a['CLA_TRAB'].", 
 	@ClaEmpresa = ".$a['CLA_EMPRESA'].", 
 	@ApPaterno = '".$a['AP_PATERNO']."',
@@ -629,39 +652,27 @@ foreach($arrayGeneral as $a){
 	@pnGlobalID			= ".$a['Global_ID'].", 
 	@pdtFechaCambSal	= '".$a['FECHA_SAL']."', 
 	@pdtFechaCambEstru  = '".$intArray[0]['varchar']."'";
-    //$stmt = sqlsrv_prepare($conn, $sql, $procedure_params);
-	//$stmt = sqlsrv_query( $conn, $sql );
+	echo $sql2."</br>GO</br>";
+	//die();
+	/*if($contador==7){
+		echo "<pre>".$sql2."</pre>"."</br>";
+		$stmt = sqlsrv_prepare( $conn2, $sql2, array());
+		if( !$stmt ) {
+			die( print_r( sqlsrv_errors(), true));
+		}else{
+			echo "prepare correct</br>";
+		}
 
-    /*if( !$stmt ) {
-		die( print_r( sqlsrv_errors(), true));
-	}else{
-		//echo "Todo bien</br>";
+		$ejecucion = sqlsrv_execute($stmt);
+		if( !$ejecucion ) {
+			die(print_r(sqlsrv_errors(), true));
+		}else{
+			echo "OK";
+			die();
+		}
+		die();
 	}*/
-
-	if(sqlsrv_query( $conn, $sql )){
-		echo "Correcto</br>";
-	}else{
-		die( print_r( sqlsrv_errors(), true));
-	}
+	$contador++;
 }
-//move back to beginning of file
-/*fseek($f, 0);
-$filename = "Archivo_" . date('Y-m-d') . ".csv";*/
-//set headers to download file rather than displayed
-/*header('Content-Type: text/csv');
-header('Content-Disposition: attachment; filename="'.$filename . '";');
-header('Content-Transfer-Encoding: binary');
-header('Expires: 0');
-header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-header('Pragma: public');
-readfile('/Descargas/'.$filename);
-//output all remaining data on a file pointer
-fpassthru($f);*/
-/*$tabla.= "</table>";
-echo $tabla;*/
-//print_r($arrayGeneral);
-// close the connection
-//ftp_close($connId);
-//$objFtp->disconnect();
 die();
 ?>
